@@ -38,7 +38,13 @@ function getOppositeDirection(dir) {
 }
 
 function changeDirection(newDirection) {
+    // 同步direction变量以便更新方向
     direction = newDirection;
+    // 在Python侧也更新方向
+    pyodide.runPythonAsync(`update_game('${direction}')`).then(state => {
+        gameState = JSON.parse(state);
+        draw();
+    });
 }
 
 async function startGame() {
@@ -46,7 +52,7 @@ async function startGame() {
         clearInterval(gameLoop);
     }
     gameState = JSON.parse(await pyodide.runPythonAsync('reset_game()'));
-    gameLoop = setInterval(gameStep, 100);  // Reduced interval to 100ms for higher responsiveness
+    gameLoop = setInterval(gameStep, 100);  // 设置更短的时间间隔以提高响应速度
 }
 
 async function gameStep() {
